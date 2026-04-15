@@ -104,12 +104,6 @@ function App() {
             A single place to move between the repo's Vega-Lite examples, compare the visual grammar with Olli's
             generated structure, and use the pair as a live demo environment.
           </p>
-          <div class="hero-tags">
-            <span class="hero-tag">Live chart preview</span>
-            <span class="hero-tag">Repo-sourced examples</span>
-            <span class="hero-tag">Olli tree output</span>
-            <span class="hero-tag">Example browser</span>
-          </div>
         </div>
         <div class="control-card">
           <p class="field-label">Now Loaded</p>
