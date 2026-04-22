@@ -222,7 +222,7 @@ function adaptUnitSpec(scene: SceneGroup, spec: TopLevelUnitSpec<any>, data: Oll
       if (!fieldDef.field) {
         return;
       }
-      if (olliSpec.mark === 'geoshape' && (channel === 'shape' || fieldDef.type === 'geojson')) {
+      if ((olliSpec.mark as string) === 'geoshape' && (channel === 'shape' || fieldDef.type === 'geojson')) {
         // Geometry objects are not directly navigable by Olli. We keep scalar metadata fields only.
         return;
       }
@@ -272,7 +272,7 @@ function adaptUnitSpec(scene: SceneGroup, spec: TopLevelUnitSpec<any>, data: Oll
     });
   }
 
-  if (olliSpec.mark === 'geoshape') {
+  if ((olliSpec.mark as string) === 'geoshape') {
     ensureGeoScalarFields(olliSpec);
 
     const geoHierarchy = inferGeoHierarchy(olliSpec.data, olliSpec.fields);

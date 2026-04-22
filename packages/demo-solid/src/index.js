@@ -2,10 +2,10 @@ import { createEffect, createMemo, createSignal, onCleanup } from 'solid-js';
 import { render } from 'solid-js/web';
 import html from 'solid-js/html';
 import * as vega from 'vega';
-import * as vegaLite from 'vega-lite';
 import { olli } from 'olli';
 import { VegaLiteAdapter } from 'olli-adapters';
 import { vegaLiteExamples } from './example-data';
+import { predicateToSelectionStore, prepareTextNavHighlight } from './vegaLiteTextNavHighlight';
 import './styles.css';
 
 function App() {
@@ -41,8 +41,8 @@ function App() {
 
     const renderExample = async () => {
       try {
-        const compiled = vegaLite.compile(example.spec).spec;
-        const runtime = vega.parse(compiled);
+        const highlightState = prepareTextNavHighlight(example.spec);
+        const runtime = vega.parse(highlightState.spec);
 
         view = new vega.View(runtime)
           .logLevel(vega.Warn)
@@ -58,8 +58,28 @@ function App() {
           return;
         }
 
-        olliRef.appendChild(olli(olliSpec));
-        setStatus(`Showing ${example.title}`);
+        if (highlightState.supportsHighlighting) {
+          const updateFocus = (predicate) => {
+            const store = predicateToSelectionStore(predicate);
+            view.data('external_state_store', store ? [store] : []).run();
+          };
+
+          olliRef.appendChild(
+            olli(olliSpec, {
+              onTextNavPred: (predicate) => {
+                updateFocus(predicate);
+              },
+            })
+          );
+        } else {
+          olliRef.appendChild(olli(olliSpec));
+        }
+
+        setStatus(
+          highlightState.supportsHighlighting
+            ? `Showing ${example.title} with linked text navigation`
+            : `Showing ${example.title} with standard Olli navigation`
+        );
       } catch (error) {
         if (disposed) {
           return;
@@ -98,17 +118,16 @@ function App() {
     <main class="dashboard-shell">
       <section class="hero-card">
         <div class="hero-copy-block">
-          <p class="eyebrow">Accessibility Preview Studio</p>
           <h1>Olli Demo Dashboard</h1>
           <p class="hero-copy">
-            A single place to move between the repo's Vega-Lite examples, compare the visual grammar with Olli's
-            generated structure, and use the pair as a live demo environment.
+            A focused interface for reviewing Vega-Lite examples alongside their Olli output, making it easier to
+            compare chart structure, navigation behavior, and accessible interpretation in one place.
           </p>
         </div>
         <div class="control-card">
-          <p class="field-label">Now Loaded</p>
+          <p class="field-label">Current Example</p>
           <p class="selected-title">${() => currentLabel()}</p>
-          <label class="field-label" for="example-select">Switch Example</label>
+          <label class="field-label" for="example-select">Browse Examples</label>
           <select id="example-select" class="select-input" value=${selectedId()} onChange=${handleSelectChange}>
             ${vegaLiteExamples.map((example) => html`
               <option value=${example.id}>
@@ -122,16 +141,38 @@ function App() {
 
       <section class="summary-grid">
         <article class="summary-card">
-          <span class="summary-label">Example Count</span>
-          <strong>${vegaLiteExamples.length}</strong>
+          <span class="summary-label">Examples Available</span>
+          <strong>${vegaLiteExamples.length} views</strong>
         </article>
         <article class="summary-card">
-          <span class="summary-label">Source File</span>
+          <span class="summary-label">Example Source</span>
           <strong>${() => currentExample()?.codePath ?? 'n/a'}</strong>
         </article>
         <article class="summary-card">
           <span class="summary-label">Gallery Route</span>
           <strong>${() => currentExample()?.galleryUrl ?? 'n/a'}</strong>
+        </article>
+      </section>
+
+      <section class="panel-grid keyboard-grid">
+        <article class="panel keyboard-panel">
+          <div class="panel-header">
+            <div>
+              <p class="panel-kicker">Olli Controls</p>
+              <h2>Navigation Shortcuts</h2>
+            </div>
+          </div>
+          <p class="keyboard-intro">Press <kbd>o</kbd> to move focus into the current Olli tree, then continue with the standard Olli keyboard controls.</p>
+          <div class="shortcut-grid">
+            <p><kbd>Up</kbd> / <kbd>Down</kbd> move up or down a level in the tree.</p>
+            <p><kbd>Left</kbd> / <kbd>Right</kbd> move between items in the current level.</p>
+            <p><kbd>Home</kbd> / <kbd>End</kbd> jump to the first or last item in a level.</p>
+            <p><kbd>x</kbd>, <kbd>y</kbd>, and <kbd>l</kbd> jump to the x-axis, y-axis, or legend.</p>
+            <p><kbd>o</kbd> returns to the top level of the current Olli tree.</p>
+            <p><kbd>Shift</kbd> + <kbd>Left</kbd> / <kbd>Right</kbd> move across facets or layers.</p>
+            <p><kbd>t</kbd> opens the table view for the current location.</p>
+            <p><kbd>f</kbd> opens the filter menu to add or remove data filters.</p>
+          </div>
         </article>
       </section>
 
@@ -150,7 +191,7 @@ function App() {
           <div class="panel-header">
             <div>
               <p class="panel-kicker">Assistive Structure</p>
-              <h2>Olli Accessibility Tree</h2>
+              <h2>Olli Tree</h2>
             </div>
           </div>
           <div class="tree-surface" ref=${(element) => (olliRef = element)}></div>
@@ -161,20 +202,22 @@ function App() {
         <article class="panel">
           <div class="panel-header">
             <div>
-              <p class="panel-kicker">Spec Object</p>
-              <h2>Extracted Vega-Lite Spec</h2>
+              <p class="panel-kicker">Specification</p>
+              <h2>Vega-Lite Spec</h2>
             </div>
           </div>
+          <p class="panel-note">The extracted chart specification used to render the active example.</p>
           <pre class="code-block"><code>${() => currentExample()?.specSource ?? ''}</code></pre>
         </article>
 
         <article class="panel">
           <div class="panel-header">
             <div>
-              <p class="panel-kicker">Original File</p>
-              <h2>Repo Example HTML</h2>
+              <p class="panel-kicker">Source</p>
+              <h2>Example HTML</h2>
             </div>
           </div>
+          <p class="panel-note">The original repo example file that feeds this dashboard view.</p>
           <pre class="code-block"><code>${() => currentExample()?.htmlSource ?? ''}</code></pre>
         </article>
       </section>

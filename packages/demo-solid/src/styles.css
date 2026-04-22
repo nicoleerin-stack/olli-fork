@@ -45,7 +45,7 @@ body {
 .dashboard-shell {
   width: min(1400px, calc(100vw - 32px));
   margin: 0 auto;
-  padding: 24px 0 40px;
+  padding: 28px 0 48px;
 }
 
 .hero-card,
@@ -56,18 +56,19 @@ body {
   background: var(--card);
   border: 1px solid var(--line);
   border-radius: 26px;
-  box-shadow: 0 20px 50px rgba(88, 69, 45, 0.08);
+  box-shadow: 0 18px 45px rgba(37, 64, 96, 0.08);
   backdrop-filter: blur(12px);
 }
 
 .hero-card {
   display: grid;
   grid-template-columns: minmax(0, 1.7fr) minmax(280px, 0.9fr);
-  gap: 24px;
-  padding: 32px;
-  margin-bottom: 18px;
+  gap: 28px;
+  padding: 34px;
+  margin-bottom: 20px;
   position: relative;
   overflow: hidden;
+  align-items: start;
 }
 
 .hero-card::after {
@@ -98,6 +99,10 @@ body {
   text-transform: uppercase;
 }
 
+.eyebrow {
+  margin-bottom: 10px;
+}
+
 h1,
 h2,
 p {
@@ -108,9 +113,9 @@ h1 {
   font-family: "Cabin", sans-serif;
   font-size: clamp(2.3rem, 4.3vw, 3.9rem);
   font-weight: 700;
-  line-height: 0.94;
+  line-height: 0.98;
   letter-spacing: -0.04em;
-  margin-bottom: 16px;
+  margin-bottom: 14px;
   white-space: nowrap;
 }
 
@@ -122,7 +127,7 @@ h2 {
 .hero-copy {
   max-width: 58ch;
   color: #4e627a;
-  line-height: 1.65;
+  line-height: 1.72;
   font-size: 1.02rem;
 }
 
@@ -131,7 +136,7 @@ h2 {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: 12px;
+  gap: 10px;
   background: linear-gradient(180deg, rgba(250, 253, 255, 0.98), rgba(240, 247, 255, 0.94));
 }
 
@@ -156,21 +161,34 @@ h2 {
 .status-line {
   color: var(--cool);
   font-size: 0.95rem;
+  min-height: 1.4em;
 }
 
 .summary-grid,
 .panel-grid {
   display: grid;
-  gap: 20px;
+  gap: 22px;
+}
+
+kbd {
+  display: inline-block;
+  padding: 2px 8px;
+  border: 1px solid rgba(77, 147, 217, 0.2);
+  border-radius: 8px;
+  background: rgba(233, 244, 255, 0.95);
+  color: #215f98;
+  font-family: "Cabin", sans-serif;
+  font-size: 0.88em;
+  font-weight: 700;
 }
 
 .summary-grid {
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  margin-bottom: 18px;
+  margin-bottom: 20px;
 }
 
 .summary-card {
-  padding: 18px 20px;
+  padding: 20px 22px;
   background: var(--card-strong);
 }
 
@@ -178,19 +196,25 @@ h2 {
   display: block;
   font-size: 1.1rem;
   overflow-wrap: anywhere;
+  color: #233a56;
+  line-height: 1.45;
 }
 
 .panel-grid {
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  margin-bottom: 18px;
+  margin-bottom: 20px;
 }
 
 .panel-grid.secondary {
   align-items: start;
 }
 
+.panel-grid.keyboard-grid {
+  grid-template-columns: 1fr;
+}
+
 .panel {
-  padding: 22px;
+  padding: 24px;
   background: var(--card-strong);
 }
 
@@ -199,7 +223,36 @@ h2 {
   align-items: flex-start;
   justify-content: space-between;
   gap: 16px;
-  margin-bottom: 18px;
+  margin-bottom: 14px;
+}
+
+.keyboard-panel {
+  padding-bottom: 18px;
+}
+
+.keyboard-intro {
+  margin-bottom: 16px;
+  color: #4e627a;
+  line-height: 1.55;
+}
+
+.shortcut-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px 18px;
+}
+
+.shortcut-grid p {
+  margin: 0;
+  color: #38506a;
+  line-height: 1.55;
+}
+
+.panel-note {
+  margin: 0 0 14px;
+  color: #58708c;
+  line-height: 1.55;
+  font-size: 0.95rem;
 }
 
 .viz-surface,
@@ -225,6 +278,14 @@ h2 {
 
 .tree-surface .olli-vis {
   min-width: 280px;
+}
+
+.tree-surface .olli-vis ul[role="tree"] {
+  margin: 0;
+}
+
+.tree-surface .olli-vis .focus {
+  outline-color: rgba(77, 147, 217, 0.7);
 }
 
 .code-block {
@@ -253,9 +314,13 @@ h2 {
     grid-template-columns: 1fr;
   }
 
+  .shortcut-grid {
+    grid-template-columns: 1fr;
+  }
+
   .dashboard-shell {
     width: min(100vw - 20px, 1400px);
-    padding-top: 14px;
+    padding-top: 16px;
   }
 
   .panel,
